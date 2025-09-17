@@ -1,0 +1,71 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: webapp-troubleshooting
+  labels:
+    name: webapp-troubleshooting
+    purpose: architecture-mismatch-demo
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-webapp
+  namespace: webapp-troubleshooting
+  labels:
+    app: simple-webapp
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: simple-webapp
+  template:
+    metadata:
+      labels:
+        app: simple-webapp
+    spec:
+      containers:
+      - name: webapp
+        image: hailongshi2024/simple-webapp-amd64:latest
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      tolerations:
+      - key: "coreservices"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: simple-webapp-service
+  namespace: webapp-troubleshooting
+  labels:
+    app: simple-webapp
+spec:
+  selector:
+    app: simple-webapp
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+  type: ClusterIP

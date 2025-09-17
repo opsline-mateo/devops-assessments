@@ -1,0 +1,81 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ingress-working
+  labels:
+    name: ingress-working
+    purpose: working-ingress-example
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: working-web-app
+  namespace: ingress-working
+  labels:
+    app: working-web-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: working-web-app
+  template:
+    metadata:
+      labels:
+        app: working-web-app
+    spec:
+      tolerations:
+      - key: "coreservices"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+      containers:
+      - name: web-server
+        image: hailongshi2024/simple-webapp-arm64:latest
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: working-web-app-service
+  namespace: ingress-working
+  labels:
+    app: working-web-app
+spec:
+  selector:
+    app: working-web-app
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: working-web-app-ingress
+  namespace: ingress-working
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: working.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: working-web-app-service
+            port:
+              number: 80

@@ -1,0 +1,57 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: probe-debugging
+  labels:
+    name: probe-debugging
+    purpose: health-check-failures-demo
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: failing-probes-app
+  namespace: probe-debugging
+  labels:
+    app: failing-probes-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: failing-probes-app
+  template:
+    metadata:
+      labels:
+        app: failing-probes-app
+    spec:
+      tolerations:
+      - key: "coreservices"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+      containers:
+      - name: probe-failer
+        image: hailongshi2024/simple-webapp-arm64:latest
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /my-endpoint
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          failureThreshold: 3

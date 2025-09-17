@@ -1,0 +1,54 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: configmap-debugging
+  labels:
+    name: configmap-debugging
+    purpose: configmap-issues-demo
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: config-dependent-app
+  namespace: configmap-debugging
+  labels:
+    app: config-dependent-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: config-dependent-app
+  template:
+    metadata:
+      labels:
+        app: config-dependent-app
+    spec:
+      tolerations:
+      - key: "coreservices"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+      containers:
+      - name: config-consumer
+        image: hailongshi2024/simple-webapp-arm64:latest
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: database-url
+        - name: API_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: api-key
