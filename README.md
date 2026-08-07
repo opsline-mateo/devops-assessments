@@ -29,7 +29,7 @@ AWS Cloud Development Kit exercises using Java to test practical CDK and AWS ski
 ### Kubernetes Assessment
 ```bash
 # Clone and setup
-git clone https://github.com/Realtyka/k8s-assessment.git
+git clone https://github.com/opsline-mateo/k8s-assessment.git
 cd k8s-assessment
 
 # Setup Kubernetes environment
@@ -46,7 +46,7 @@ cd ../exercises/k8s
 ### Terraform Assessment
 ```bash
 # Clone and setup
-git clone https://github.com/Realtyka/real-devops-assessment.git
+git clone https://github.com/opsline-mateo/devops-assessment.git
 cd real-devops-assessment
 
 # Setup Terraform environment
@@ -63,7 +63,7 @@ cd exercises/1-s3-bucket
 ### Java CDK Assessment
 ```bash
 # Clone and setup
-git clone https://github.com/Realtyka/k8s-assessment.git
+git clone https://github.com/opsline-mateo/k8s-assessment.git
 cd real-devops-assessment
 
 # Setup Java CDK environment
